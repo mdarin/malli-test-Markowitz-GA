@@ -187,20 +187,9 @@ func (p *PortfolioS) Formalize() {
 	for i := 0; i < workers; i++ {
 		go func (a, b *ma.Matrix, cursor int, wg *sync.WaitGroup) {
 			defer wg.Done()
-			//TODO: Вычислим логарифмические доходности r[t] = ln(x[t]/x[t-1]) в процентах.
-			// Логарифмическая мера r = ln(x2/x1) обычно лучше, чем мультипликативная r = (x2-x1)/x1,
-			// так как она устраняет присущую процентам неаддитивность.
-			// Как ивестно, (x + 1%) - 1% =/= x, поэтому, если сегодня цена выросла на 1%, а на следующий день
-			// упала на 1%, то итоговое относительное изменение будет меньше нуля.
-			// Сложение же логарифмических доходностей в точности равно отношению конечной и начальной цен:
-			// ln(x1/x0) + ln(x2/x1) + ... + ln(xn/xn-1) = ln(xn/x0).
-			// Поэтму корректнее вычислять, например, среднюю доходность именно по логарифмических величинах.
 			mean := ma.Mean(b, cursor, ma.COLVECTOR)
 			a.Setij(cursor, 0, mean)
 		}(Rx, Assets, i, &wg)
-	//	cursor := i
-	//	mean := ma.Mean(Assets, cursor, ma.COLVECTOR)
-	//	Rx.Setij(cursor, 0, mean)
 	} // eof for
 	wg.Wait()
 
@@ -214,10 +203,6 @@ func (p *PortfolioS) Formalize() {
 				a.Setij(cursor, j, ma.Covariance(b, b , cursor, j, ma.COLVECTOR))
 			}
 		}(COV, Assets, i, &wg)
-	//	cursor := i
-	//	for j := 0; j < Assets.Cols(); j++ {
-	//		COV.Setij(cursor, j, ma.Covariance(Assets, Assets, cursor, j, ma.COLVECTOR))
-	//	}
 	} // eof for
 	wg.Wait()
 
@@ -390,16 +375,6 @@ func (p *PortfolioS) Function() float64 {
 					a.Setij(cursor, 0, sum)
 				}
 			}(Tmp, COV, W, i, &wg)
-
-	//			var sum float64 = 0.0
-	//			cursor := i
-	//			for j := 0; j < COV.Cols(); j++ {
-	//				value_wcursor,_ := W.Getij(cursor, 0)
-	//				value_wj,_ := W.Getij(j, 0)
-	//				value_cov,_ := COV.Getij(cursor, j)
-	//				sum += value_wcursor * value_wj * value_cov
-	//				Tmp.Setij(cursor, 0, sum)
-	//			}
 		} // eof for
 		wg.Wait()
 
@@ -574,16 +549,8 @@ func (p *PopulationS) FoundingFathers() {
 	// получить перивичные параметры
 	//
 	//количество инструментов в портфеле
-	quantity := 12
+	quantity := 5
 	// портфель состоит из 5 активов всего доступных активов 20
-	//n := float64(Assets.Cols()) // всего достпно акций 
-	//k := float64(quantity) // число акций в портфеле(quantity)
-	//ratio := 1000.0 // размер поруляции выраженный долей от числа возможных комбинаций
-	// количество сочетаний активов в портфеле
-	//perm := ma.PermOfNbyK(n,k)
-	//fmt.Printf("perms of %.0f by %.0f : %f\n", n, k, perm)
-	//fmt.Printf("perms/%.0f: %f\n", ratio, math.Round(perm/ratio))
-	//fmt.Printf("\n")
 
 	//
 	// сформировать поколоение начального приближения
@@ -983,7 +950,7 @@ func (p *PopulationS) repair(index int) {
 // условие останова
 func (p PopulationS) Done(generation int) bool {
 	// если работа только начата, то проверять условия останова не следует
-	if generation < 3 {
+	if generation < 5 {
 		return false
 	}
 	//TODO: эпсилон надо бы задавать из вне
