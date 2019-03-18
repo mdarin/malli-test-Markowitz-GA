@@ -526,7 +526,7 @@ func (p *PopulationS) FoundingFathers() {
 	//
 	fmt.Println("FoundingFathers()")
 	//FIXME: open file for reading
-	fi, err := os.Open("./t_assets_20.mat")
+	fi, err := os.Open("./data/t_assets_20.mat")
 	if err != nil {
 		fmt.Println("Error openning file:", err)
 		os.Exit(1)
